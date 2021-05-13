@@ -17,6 +17,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { API_URL } from "../config";
+import useSWR from 'swr'
 import { db } from "../firebase";
 import Router from "next/router";
 const useStyles = makeStyles((theme) => ({
@@ -35,7 +36,11 @@ const useStyles = makeStyles((theme) => ({
     margin: 20,
   },
 }));
-export default function Home({ dataMahasiswa }) {
+
+
+const fetcher = url => fetch(url).then(r => r.json())
+
+export default function Home() {
   const classes = useStyles();
   const [errorYear, seterrorYear] = useState(false);
   const [errorNim, seterrorNim] = useState(false);
@@ -48,6 +53,8 @@ export default function Home({ dataMahasiswa }) {
     kdprodi: "",
     tahunmsk: "",
   });
+
+  const { data, error } = useSWR('/api/mahasiswa', fetcher)
   const handleYear = (event) => {
     seterrorYear(false);
     let date_regex = /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
@@ -62,7 +69,6 @@ export default function Home({ dataMahasiswa }) {
       seterrorYear(true);
     }
   };
-  console.log("DATA MAHASISWA",dataMahasiswa)
 
   const handleNim = (event) => {
     seterrorNim(false);
@@ -98,13 +104,11 @@ export default function Home({ dataMahasiswa }) {
         },
         { merge: true }
       );
-      alert("Berhasil Input Data");
-      Router.reload();
+      alert("Input Data Berhasil")
     } catch (error) {
       console.log(error);
       alert("Gagal Input Data");
     }
-    console.log("FORM", form);
   };
   return (
     <Container>
@@ -201,7 +205,7 @@ export default function Home({ dataMahasiswa }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {dataMahasiswa.data.map((item, index) => (
+            {data?.data.map((item, index) => (
               <TableRow key={index}>
                 <TableCell>
                   <p>{index + 1}</p>
@@ -224,12 +228,3 @@ export default function Home({ dataMahasiswa }) {
   );
 }
 
-export async function getStaticProps() {
-  const res = await fetch(`${API_URL}/api/mahasiswa/`);
-  const dataMahasiswa = await res.json();
-  return {
-    props: {
-      dataMahasiswa,
-    },
-  };
-}
