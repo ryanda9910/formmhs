@@ -1,8 +1,8 @@
 module.exports={
   //DEV
-  API_URL:'http://localhost:3000',
+  // API_URL:'http://localhost:3000',
 
 
   // //PROD
-  // API_URL:'http://localhost:3000/'
+  API_URL:'https://formmhs.vercel.app/'
 }
