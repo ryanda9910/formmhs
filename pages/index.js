@@ -1,65 +1,235 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import React, { useState } from "react";
+import {
+  TextField,
+  Container,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  TableContainer,
+  TableCell,
+  TableHead,
+  TableBody,
+  Table,
+  Paper,
+  TableRow
+} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { API_URL } from "../config";
+import { db } from "../firebase";
+import Router from "next/router";
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    position: "absolute",
+    width: "100vh",
+    backgroundColor: theme.palette.background.paper,
+    border: "2px solid #000",
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+  },
+  button: {
+    margin: 20,
+  },
+  textfield: {
+    margin: 20,
+  },
+}));
+export default function Home({ dataMahasiswa }) {
+  const classes = useStyles();
+  const [errorYear, seterrorYear] = useState(false);
+  const [errorNim, seterrorNim] = useState(false);
+  const [errorKdprodi, seterrorKdProdi]= useState(false)
 
-export default function Home() {
+  const [form, setform] = useState({
+    nim: "",
+    nama: "",
+    jnskelamin: "",
+    kdprodi: "",
+    tahunmsk: "",
+  });
+  const handleYear = (event) => {
+    seterrorYear(false);
+    let date_regex = /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
+    if (
+      date_regex.test(event.target.value) ||
+      event.target.value.length === 4
+    ) {
+      setform({ ...form, tahunmsk: event.target.value });
+    } else if (event.target.value.length === 0) {
+      seterrorYear(false);
+    } else {
+      seterrorYear(true);
+    }
+  };
+  console.log("DATA MAHASISWA",dataMahasiswa)
+
+  const handleNim = (event) => {
+    seterrorNim(false);
+    let nim_regex = /^[a-z]{0,10}$/;
+    if (
+      nim_regex.test(event.target.value) ||
+      event.target.value.length === 10
+    ) {
+      setform({ ...form, nim: event.target.value });
+    } else if (event.target.value.length === 0) {
+      seterrorNim(false);
+    } else {
+      seterrorNim(true);
+    }
+  };
+  const handleKdProdi=(event)=>{
+    seterrorKdProdi(false)
+    if(event.target.value.length===3 || event.target.value.length===2){
+      setform({...form,kdprodi:event.target.value})
+    }else{
+      seterrorKdProdi(true)
+    }
+  }
+  const inputData = () => {
+    try {
+      db.collection("mahasiswa").doc().set(
+        {
+          nim: form.nim,
+          nama: form.nama,
+          jnskel: form.jnskelamin,
+          kdprodi: form.kdprodi,
+          tahunmsk: form.tahunmsk,
+        },
+        { merge: true }
+      );
+      alert("Berhasil Input Data");
+      Router.reload();
+    } catch (error) {
+      console.log(error);
+      alert("Gagal Input Data");
+    }
+    console.log("FORM", form);
+  };
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
+    <Container>
+      <h1>Form Mahasiswa</h1>
+      <TextField
+        fullWidth
+        style={{ margin: 20 }}
+        onChange={(event) => handleNim(event)}
+        label='NIM'
+        size='small'
+        type='text'
+      />
+      {errorNim && (
+        <p style={{ color: 12, color: "red", margin: 20 }}>
+          Input NIM Belum Valid
         </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      )}
+      <TextField
+        fullWidth
+        style={{ margin: 20 }}
+        onChange={(event) => setform({ ...form, nama: event.target.value })}
+        label='Nama'
+        size='small'
+        type='text'
+      />
+      <FormControl fullWidth style={{ margin: 20 }}>
+        <InputLabel id='demo-customized-select-label'>Jenis Kelamin</InputLabel>
+        <Select
+          value={form.jnskelamin}
+          onChange={(event) =>
+            setform({ ...form, jnskelamin: event.target.value })
+          }
+          labelId='demo-customized-select-label'
+          id='demo-customized-select'
         >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+          <MenuItem value=''>
+            <em>None</em>
+          </MenuItem>
+          <MenuItem value={"Pria"}>Pria</MenuItem>
+          <MenuItem value={"Wanita"}>Wanita</MenuItem>
+        </Select>
+      </FormControl>
+      <TextField
+        fullWidth
+        style={{ margin: 20 }}
+        label='Kode Prodi'
+        size='small'
+        placeholder='ex: SIF,TI'
+        type='text'
+        onChange={(event)=>handleKdProdi(event)}
+      />
+      {errorKdprodi && (
+        <p style={{ color: 12, color: "red", margin: 20 }}>
+          Input Kode Prodi Belum Valid
+        </p>
+      )}
+
+      <TextField
+        placeholder='ex: 2018,2019'
+        fullWidth
+        label='Tahun Masuk'
+        type='text'
+        style={{ margin: 20 }}
+        onChange={(event) => handleYear(event)}
+        size='small'
+      />
+      {errorYear && (
+        <p style={{ color: 12, color: "red", margin: 20 }}>
+          Input Tahun Belum Valid
+        </p>
+      )}
+      <Button
+        disabled={errorNim || errorYear}
+        style={{ margin: 20 }}
+        className={classes.button}
+        color='secondary'
+        type='submit'
+        variant='contained'
+        onClick={(event) => inputData(event)}
+      >
+        Sumbit
+      </Button>
+
+      <TableContainer component={Paper}>
+        <Table aria-label='simple table'>
+          <TableHead>
+            <TableRow>
+              <TableCell>No</TableCell>
+              <TableCell>Nim</TableCell>
+              <TableCell>Nama</TableCell>
+              <TableCell>Jenis Kelamin</TableCell>
+              <TableCell>Kode Prodi</TableCell>
+              <TableCell>Tahun Masuk</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {dataMahasiswa.data.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <p>{index + 1}</p>
+                </TableCell>
+                <TableCell>{item.nim}</TableCell>
+                <TableCell>{item.nama}</TableCell>
+                <TableCell>{item.jnskel}</TableCell>
+                <TableCell>
+                  {item.kdprodi}
+                </TableCell>
+                <TableCell>
+                  {item.tahunmsk}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Container>
+  );
+}
+
+export async function getStaticProps() {
+  const res = await fetch(`${API_URL}/api/mahasiswa/`);
+  const dataMahasiswa = await res.json();
+  return {
+    props: {
+      dataMahasiswa,
+    },
+  };
 }
