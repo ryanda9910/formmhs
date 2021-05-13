@@ -4,5 +4,5 @@ module.exports={
 
 
   // //PROD
-  API_URL:'https://formmhs.vercel.app/'
+  API_URL:'https://formmhs.vercel.app'
 }
