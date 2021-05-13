@@ -195,7 +195,7 @@ export default function Home() {
         variant='contained'
         onClick={(event) => inputData(event)}
       >
-        Sumbit
+        Submit
       </Button>
 
       <TableContainer component={Paper}>
