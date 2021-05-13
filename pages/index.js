@@ -13,11 +13,11 @@ import {
   TableBody,
   Table,
   Paper,
-  TableRow
+  TableRow,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { API_URL } from "../config";
-import useSWR from 'swr'
+import useSWR from "swr";
 import { db } from "../firebase";
 import Router from "next/router";
 const useStyles = makeStyles((theme) => ({
@@ -37,14 +37,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-
-const fetcher = url => fetch(url).then(r => r.json())
+const fetcher = (url) => fetch(url).then((r) => r.json());
 
 export default function Home() {
   const classes = useStyles();
   const [errorYear, seterrorYear] = useState(false);
   const [errorNim, seterrorNim] = useState(false);
-  const [errorKdprodi, seterrorKdProdi]= useState(false)
+  const [errorKdprodi, seterrorKdProdi] = useState(false);
 
   const [form, setform] = useState({
     nim: "",
@@ -54,7 +53,7 @@ export default function Home() {
     tahunmsk: "",
   });
 
-  const { data, error } = useSWR('/api/mahasiswa', fetcher)
+  const { data, error } = useSWR("/api/mahasiswa", fetcher);
   const handleYear = (event) => {
     seterrorYear(false);
     let date_regex = /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
@@ -84,14 +83,14 @@ export default function Home() {
       seterrorNim(true);
     }
   };
-  const handleKdProdi=(event)=>{
-    seterrorKdProdi(false)
-    if(event.target.value.length===3 || event.target.value.length===2){
-      setform({...form,kdprodi:event.target.value})
-    }else{
-      seterrorKdProdi(true)
+  const handleKdProdi = (event) => {
+    seterrorKdProdi(false);
+    if (event.target.value.length === 3 || event.target.value.length === 2) {
+      setform({ ...form, kdprodi: event.target.value });
+    } else {
+      seterrorKdProdi(true);
     }
-  }
+  };
   const inputData = () => {
     try {
       db.collection("mahasiswa").doc().set(
@@ -104,9 +103,8 @@ export default function Home() {
         },
         { merge: true }
       );
-      alert("Input Data Berhasil")
+      alert("Input Data Berhasil");
     } catch (error) {
-      console.log(error);
       alert("Gagal Input Data");
     }
   };
@@ -158,7 +156,7 @@ export default function Home() {
         size='small'
         placeholder='ex: SIF,TI'
         type='text'
-        onChange={(event)=>handleKdProdi(event)}
+        onChange={(event) => handleKdProdi(event)}
       />
       {errorKdprodi && (
         <p style={{ color: 12, color: "red", margin: 20 }}>
@@ -181,7 +179,15 @@ export default function Home() {
         </p>
       )}
       <Button
-        disabled={errorNim || errorYear}
+        disabled={
+          errorNim ||
+          errorYear ||
+          form.jnskelamin === "" ||
+          form.nim === "" ||
+          form.nama === "" ||
+          form.tahunmsk === "" ||
+          form.kdprodi === ""
+        }
         style={{ margin: 20 }}
         className={classes.button}
         color='secondary'
@@ -213,12 +219,8 @@ export default function Home() {
                 <TableCell>{item.nim}</TableCell>
                 <TableCell>{item.nama}</TableCell>
                 <TableCell>{item.jnskel}</TableCell>
-                <TableCell>
-                  {item.kdprodi}
-                </TableCell>
-                <TableCell>
-                  {item.tahunmsk}
-                </TableCell>
+                <TableCell>{item.kdprodi}</TableCell>
+                <TableCell>{item.tahunmsk}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -227,4 +229,3 @@ export default function Home() {
     </Container>
   );
 }
-
